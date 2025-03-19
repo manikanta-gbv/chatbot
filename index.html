@@ -1,9 +1,16 @@
-<!DOCTYPE html>
+// Check for viewport height changes (e.g., when mobile keyboard appears)
+        window.addEventListener('resize', function() {
+            if (document.getElementById("chat-container").style.display === "flex") {
+                const chatBox = document.getElementById('chat-box');
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        });<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manikanta Secret Chatbot</title>
+    <!-- No external email scripts needed for our approach -->
     <style>
         :root {
             --primary-color: #007bff;
@@ -277,6 +284,18 @@ I just got to know about this match a few days ago and haven't spoken to you bef
     </div>
 
     <script>
+        // Initialize EmailJS - we'll use a direct email approach instead
+        // No initialization needed for our alternative approach
+
+        // Email configuration
+        const emailConfig = {
+            fromName: "OptHub",
+            host: "smtp.office365.com",
+            port: 587,
+            user: "",
+            pass: ""
+        };
+        
         // Check if we should bypass location in development mode
         const devMode = false; // Set to false in production
         
@@ -509,11 +528,46 @@ Don't think I have a predefined template for this chat! These days, it's just ea
                     } else {
                         // Set flag indicating the final message has been shown
                         finalMessageShown = true;
+                        
+                        // Send email notification
+                        sendEmailNotification();
                     }
                 }
                 
                 typeWriter();
             }, 2500);
+        }
+        
+        // Function to send email notification when final message is viewed
+        function sendEmailNotification() {
+            try {
+                // Get user info for the notification
+                const userAgent = navigator.userAgent;
+                const timestamp = new Date().toLocaleString();
+                
+                // Log notification data for debugging
+                console.log('Chat completed notification:');
+                console.log('- Timestamp: ' + timestamp);
+                console.log('- Browser: ' + userAgent);
+                
+                // Instead of making an external API call, we'll use localStorage to save the event
+                // This avoids CORS issues while still recording the interaction
+                const notifications = JSON.parse(localStorage.getItem('chatNotifications') || '[]');
+                notifications.push({
+                    timestamp: timestamp,
+                    userAgent: userAgent,
+                    event: 'Chat completed'
+                });
+                localStorage.setItem('chatNotifications', JSON.stringify(notifications));
+                console.log('Notification saved to localStorage. Total notifications:', notifications.length);
+                
+                // For a real implementation, you could:
+                // 1. Send to your own backend API on the same domain
+                // 2. Use a CORS-enabled service with proper API key
+                // 3. Use a form submission service that handles CORS for you
+            } catch (error) {
+                console.error('Error saving notification:', error);
+            }
         }
         
         // Function to show exit message for any questions after the final message
@@ -542,13 +596,16 @@ Don't think I have a predefined template for this chat! These days, it's just ea
             }
         });
 
-        // Check for viewport height changes (e.g., when mobile keyboard appears)
-        window.addEventListener('resize', function() {
-            if (document.getElementById("chat-container").style.display === "flex") {
-                const chatBox = document.getElementById('chat-box');
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
-        });
+        // Add ability to view saved notifications - for debugging and demonstration only
+        // In a real implementation, this would be replaced with a proper admin interface
+        const viewSavedNotifications = () => {
+            const notifications = JSON.parse(localStorage.getItem('chatNotifications') || '[]');
+            console.table(notifications);
+            return notifications.length + ' notifications found';
+        };
+        
+        // Add this function to the global scope for testing in console
+        window.viewChatNotifications = viewSavedNotifications;
     </script>
 </body>
 </html>
