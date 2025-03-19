@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manikanta Secret Chatbot</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --bg-color: #f4f4f4;
+            --container-bg: white;
+            --user-msg-bg: #d1e7ff;
+            --bot-msg-bg: #f0f0f0;
+            --disclaimer-bg: #fef0e1;
+            --disclaimer-border: #f7b955;
+            --border-radius-sm: 0.5rem;
+            --border-radius-md: 0.75rem;
+            --border-radius-lg: 1rem;
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 0.75rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-md: 1rem;
+            --font-size-lg: 1.25rem;
+            --font-size-xl: 1.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            padding: 5vh 1rem; /* Use vh for top/bottom padding to ensure good spacing on all devices */
+        }
+
+        h1 {
+            color: var(--bg-color); /* Text color same as background */
+            margin-bottom: var(--spacing-xl);
+            position: relative;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 600px; /* Max width for larger screens */
+            height: auto;
+            min-height: 70vh; /* Use viewport height for responsive height */
+            background: var(--container-bg);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            display: none; /* Initially hidden until location is verified */
+            margin-top: var(--spacing-lg);
+        }
+
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 60vh; /* Ensure chat box has sufficient height */
+            max-height: 70vh; /* Limit max height on larger screens */
+            overflow-y: auto;
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .chat-message {
+            margin: var(--spacing-sm) 0;
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius-md);
+            max-width: 85%;
+            word-wrap: break-word;
+            font-size: var(--font-size-md);
+            line-height: 1.5;
+        }
+
+        @media (max-width: 480px) {
+            .chat-message {
+                max-width: 90%; /* Wider messages on smaller screens */
+                padding: var(--spacing-sm);
+                font-size: var(--font-size-sm);
+            }
+        }
+
+        .user-message {
+            background: var(--user-msg-bg);
+            align-self: flex-end;
+        }
+
+        .bot-message {
+            background: var(--bot-msg-bg);
+            align-self: flex-start;
+        }
+
+        .input-box {
+            display: flex;
+            margin-top: var(--spacing-md);
+            width: 100%;
+        }
+
+        input {
+            flex-grow: 1;
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius-sm);
+            border: 1px solid #ccc;
+            font-size: var(--font-size-md);
+        }
+
+        button {
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: var(--border-radius-sm);
+            margin-left: var(--spacing-sm);
+            font-size: var(--font-size-md);
+            font-weight: bold;
+            white-space: nowrap; /* Prevent button text wrapping */
+        }
+
+        @media (max-width: 480px) {
+            input, button {
+                padding: var(--spacing-sm);
+                font-size: var(--font-size-sm);
+            }
+            
+            button {
+                padding: var(--spacing-sm) var(--spacing-md);
+            }
+        }
+
+        .hint {
+            font-size: var(--font-size-xs);
+            color: gray;
+            margin-top: var(--spacing-xs);
+        }
+
+        .typing {
+            font-style: italic;
+            color: gray;
+        }
+
+        .disclaimer {
+            background: var(--disclaimer-bg);
+            border-left: 4px solid var(--disclaimer-border);
+            font-size: var(--font-size-sm);
+            line-height: 1.4;
+        }
+
+        .final-message {
+            font-size: var(--font-size-sm);
+            line-height: 1.5;
+        }
+
+        .location-prompt {
+            text-align: center;
+            background-color: var(--container-bg);
+            padding: var(--spacing-xl);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        @media (max-width: 600px) {
+            .location-prompt {
+                padding: var(--spacing-lg);
+            }
+        }
+
+        .location-prompt h2 {
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-lg);
+        }
+
+        .location-prompt p {
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-md);
+        }
+
+        .location-button {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            font-size: var(--font-size-md);
+            cursor: pointer;
+        }
+
+        @media (max-width: 480px) {
+            .location-button {
+                padding: var(--spacing-sm) var(--spacing-md);
+                font-size: var(--font-size-sm);
+            }
+        }
+
+        #error-msg {
+            color: red;
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-xs);
+        }
+
+        #location-error {
+            color: red;
+            margin-top: var(--spacing-md);
+            font-size: var(--font-size-sm);
+        }
+    </style>
+</head>
+<body>
+    <h1>#ManiKa</h1>
+    
+    <!-- Location Prompt -->
+    <div class="location-prompt" id="location-prompt">
+        <h2>Location Verification</h2>
+        <p>This chatbot requires access to your location to verify you're in Karnataka.</p>
+        <button class="location-button" onclick="requestLocation()">Allow Location Access</button>
+        <p id="location-error"></p>
+    </div>
+    
+    <div class="chat-container" id="chat-container">
+        <div class="chat-box" id="chat-box">
+            <div class="chat-message bot-message disclaimer">⚠️ <strong>Quick Disclaimer</strong><br>
+I just got to know about this match a few days ago and haven't spoken to you before. So, if this message feels like I'm taking a shortcut or assuming anything—trust me, that's not the intention! I respect your choice, and this is just my way of saying hi in a way that <em>doesn't</em> feel like a job interview. 😅</div>
+            <div class="chat-message bot-message">Before we go any further, let's do a quick "Are You Really Kavya?" verification test. Just making sure I'm not chatting with a secret agent or a long-lost twin! 😜</div>
+            <div class="chat-message bot-message" id="chat-msg">Q1. What's your date of birth? (Please use DD/MM/YYYY format)</div>
+        </div>
+        <div class="input-box" id="input-box">
+            <input type="text" id="user-input" placeholder="Type your answer...">
+            <button onclick="processAnswer()">Send</button>
+        </div>
+        <p id="error-msg"></p>
+    </div>
+
+    <script>
+        // Check if we should bypass location in development mode
+        const devMode = false; // Set to false in production
+        
+        // Initially show location prompt and hide chat
+        document.getElementById("location-prompt").style.display = "block";
+        document.getElementById("chat-container").style.display = "none";
+        
+        // Function to request location
+        function requestLocation() {
+            if (devMode) {
+                // Skip location check in dev mode
+                document.getElementById("location-prompt").style.display = "none";
+                document.getElementById("chat-container").style.display = "flex";
+                return;
+            }
+            
+            if (navigator.geolocation) {
+                document.getElementById("location-error").innerText = "Checking your location...";
+                navigator.geolocation.getCurrentPosition(verifyLocation, locationError);
+            } else {
+                document.getElementById("location-error").innerText = "Geolocation is not supported by this browser.";
+            }
+        }
+        
+        // Function to verify location
+        function verifyLocation(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            
+            // Make API request to get location information
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Location data:", data); // For debugging
+                    
+                    // Check if in Karnataka state
+                    const state = data.address && data.address.state;
+                    if (state && state.toLowerCase().includes("karnataka")) {
+                        // Location verified, show chat
+                        document.getElementById("location-prompt").style.display = "none";
+                        document.getElementById("chat-container").style.display = "flex";
+                    } else {
+                        // Not in Karnataka
+                        document.getElementById("location-error").innerText = 
+                            "Access restricted. This chatbot is only available in Karnataka. " +
+                            "Your current state: " + (state || "Unknown");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching location data:", error);
+                    document.getElementById("location-error").innerText = 
+                        "Failed to verify your location. Please try again later.";
+                });
+        }
+        
+        // Function to handle location errors
+        function locationError(error) {
+            let errorMessage;
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage = "Location access denied. Please allow location access to use this chatbot.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage = "Location information is unavailable.";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage = "The request to get location timed out.";
+                    break;
+                default:
+                    errorMessage = "An unknown error occurred while getting location.";
+                    break;
+            }
+            document.getElementById("location-error").innerText = errorMessage;
+        }
+
+        const questions = [
+            { text: "What's your date of birth? (Please use DD/MM/YYYY format)", answer: "14/06/1999", hint: "Please enter in DD/MM/YYYY format (e.g., 01/01/2000)" },
+            { text: "Where did you complete your Master's?", validAnswers: ["amalapuram", "batlapalem", "bvc", "bvc engineering college"] },
+            { text: "What is the name of the photographer/friend/mobile owner of the saree picture you sent to our boss, Manikanta?", answer: "harini", hint: "You can find the name in the bottom left corner of the photo. Eg: Shot on Oneplus By " }
+        ];
+        let currentQuestion = 0;
+        let finalMessageShown = false; // Flag to track if the final message has been shown
+
+        function processAnswer() {
+            const input = document.getElementById('user-input').value.trim().toLowerCase();
+            const chatBox = document.getElementById('chat-box');
+            
+            // Add user message to chat
+            chatBox.innerHTML += `<div class='chat-message user-message'>${input}</div>`;
+            
+            // If final message was already shown, give exit response for any further questions
+            if (finalMessageShown) {
+                showExitMessage();
+                document.getElementById('user-input').value = "";
+                chatBox.scrollTop = chatBox.scrollHeight;
+                return;
+            }
+            
+            const question = questions[currentQuestion];
+            
+            // Check answer for first two questions only
+            if (currentQuestion < 2) {
+                if (question.validAnswers) {
+                    if (!question.validAnswers.includes(input)) {
+                        document.getElementById('error-msg').innerText = "Incorrect answer. Try again!";
+                        return;
+                    }
+                } else if (question.answer && input !== question.answer.toLowerCase()) {
+                    document.getElementById('error-msg').innerText = "Incorrect answer. Try again!";
+                    return;
+                }
+            }
+            // For third question, proceed regardless of the answer
+            else if (currentQuestion === 2 && input !== question.answer.toLowerCase()) {
+                // Show a message that the answer might be incorrect but proceed anyway
+                chatBox.innerHTML += `<div class='chat-message bot-message'>That might not be correct, but let's proceed anyway!</div>`;
+            }
+            
+            document.getElementById('error-msg').innerText = "";
+            currentQuestion++;
+            
+            if (currentQuestion < questions.length) {
+                showTypingEffect(`Q${currentQuestion + 1}. ${questions[currentQuestion].text}`, questions[currentQuestion].hint);
+            } else {
+                showDetails();
+            }
+            
+            document.getElementById('user-input').value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function showTypingEffect(text, hint = "") {
+            const chatBox = document.getElementById('chat-box');
+            const typingIndicator = document.createElement('div');
+            typingIndicator.classList.add('chat-message', 'bot-message', 'typing');
+            typingIndicator.innerText = "Typing...";
+            chatBox.appendChild(typingIndicator);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            setTimeout(() => {
+                typingIndicator.remove();
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('chat-message', 'bot-message');
+                chatBox.appendChild(messageDiv);
+                
+                let i = 0;
+                const speed = 30; // typing speed in milliseconds
+                
+                function typeWriter() {
+                    if (i < text.length) {
+                        messageDiv.innerHTML += text.charAt(i);
+                        i++;
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                        setTimeout(typeWriter, speed);
+                    } else {
+                        if (hint) {
+                            const hintDiv = document.createElement('div');
+                            hintDiv.classList.add('hint');
+                            hintDiv.innerText = `(Hint: ${hint})`;
+                            messageDiv.appendChild(hintDiv);
+                        }
+                    }
+                }
+                
+                typeWriter();
+            }, 1500);
+        }
+
+        function showDetails() {
+            showTypingEffect("🎉 Verified! Now, here's what you wanted to know:");
+            
+            setTimeout(() => {
+                const chatBox = document.getElementById('chat-box');
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('chat-message', 'bot-message', 'final-message');
+                chatBox.appendChild(messageDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                
+                const finalMessage = `**Hey Kavya,**
+This is Manikanta. I got a forwarded message from your mother, and I felt like you might want to know about me. Instead of a typical introduction, I thought of sharing it this way—not to impress you, but to make it feel like we're already having a conversation.
+🎓 **Education:** My academic journey? A rollercoaster—full of **plot twists, cliffhangers, and surprise exams**. But in the end, I conquered it and earned my **Master's from JNTU Kakinada**.
+💻 **Career:** Started as an **intern** at **TechOptima**, a Hyderabad-based startup. My journey began as a **Full Stack Developer**, and as we ventured into **AI research**, I leveled up to **AI Researcher (Beginner Mode: Activated 🚀).**
+🏆 **Role at Work?** Well, you know how startups work—**titles are just fancy labels**. Even with just **2+ years of experience**, they call me a **Senior Developer** and even announced me as a **Technical Lead**. (Don't ask me how—I'm still figuring that out myself 🤔).
+💰 **Salary Trivia:** Currently at **8.73 LPA**, with a **take-home of ~63K**.
+📅 **Experience Check:** By this **March**, I'll be hitting **3 years** in this battlefield called the **corporate world**.
+💑 **What's Next?** If our **horoscopes match**, maybe we can **start a journey together**—sharing experiences, enjoying good food, and figuring out life one step at a time. I'm not really into horoscopes, but since **families care about them**, let's see how things go. 😊
+**Oh, and one small request—please don't tell all this stuff to your mom!** 😂 Let's keep this **our little secret** (for now).
+Waiting for your next move, **Agent Kavya.** 😎🎉 If you're up for a **challenge**, **decode this** to get my number: **HAGIDDFCFF.** Think of it as a **test of fate**… or just a fun puzzle. 😜
+**No pressure—just saying hi.** Hope this message didn't weird you out too much. 😅
+*(P.S. Shoutout to **ChatGPT** for helping me write this in a fun way instead of sending a boring text! 😅)*
+Don’t think I have a predefined template for this chat! These days, it’s just easier with the help of GPTs.
+`;
+                
+                // Convert markdown-style formatting to HTML
+                let formattedMessage = finalMessage
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic text
+                    .replace(/\n/g, '<br>'); // Line breaks
+                
+                let i = 0;
+                const speed = 5; // Faster typing speed for the long message
+                
+                function typeWriter() {
+                    if (i < formattedMessage.length) {
+                        // Check if we're at the start of an HTML tag
+                        if (formattedMessage[i] === '<') {
+                            // Find the end of the tag
+                            let tagEnd = formattedMessage.indexOf('>', i);
+                            if (tagEnd !== -1) {
+                                // Add the entire tag at once
+                                messageDiv.innerHTML += formattedMessage.substring(i, tagEnd + 1);
+                                i = tagEnd + 1;
+                            } else {
+                                // Just in case there's no closing bracket
+                                messageDiv.innerHTML += formattedMessage[i];
+                                i++;
+                            }
+                        } else {
+                            messageDiv.innerHTML += formattedMessage[i];
+                            i++;
+                        }
+                        
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                        setTimeout(typeWriter, speed);
+                    } else {
+                        // Set flag indicating the final message has been shown
+                        finalMessageShown = true;
+                    }
+                }
+                
+                typeWriter();
+            }, 2500);
+        }
+        
+        // Function to show exit message for any questions after the final message
+        function showExitMessage() {
+            const chatBox = document.getElementById('chat-box');
+            const typingIndicator = document.createElement('div');
+            typingIndicator.classList.add('chat-message', 'bot-message', 'typing');
+            typingIndicator.innerText = "Typing...";
+            chatBox.appendChild(typingIndicator);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            setTimeout(() => {
+                typingIndicator.remove();
+                const exitMessage = document.createElement('div');
+                exitMessage.classList.add('chat-message', 'bot-message');
+                exitMessage.innerHTML = "Well, that's my cue to exit! 🚪😅 Take care and don't block me… yet! 😂";
+                chatBox.appendChild(exitMessage);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 1000);
+        }
+
+        // Add event listener for Enter key
+        document.getElementById('user-input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                processAnswer();
+            }
+        });
+
+        // Check for viewport height changes (e.g., when mobile keyboard appears)
+        window.addEventListener('resize', function() {
+            if (document.getElementById("chat-container").style.display === "flex") {
+                const chatBox = document.getElementById('chat-box');
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
