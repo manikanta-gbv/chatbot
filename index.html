@@ -28,6 +28,15 @@
             --font-size-xl: 1.5rem;
         }
 
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --container-bg: #1e1e1e;
+                --bot-msg-bg: #2a2a2a;
+                --user-msg-bg: #003366;
+            }
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -46,9 +55,11 @@
         }
 
         h1 {
-            color: var(--bg-color); /* Text color same as background */
+            color: var(--primary-color); /* Use primary color instead of background color */
             margin-bottom: var(--spacing-xl);
             position: relative;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Add slight shadow for better visibility */
         }
 
         .chat-container {
@@ -98,11 +109,19 @@
         .user-message {
             background: var(--user-msg-bg);
             align-self: flex-end;
+            color: white; /* Ensure text is visible in dark mode */
         }
 
         .bot-message {
             background: var(--bot-msg-bg);
             align-self: flex-start;
+            color: #333; /* Default text color */
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .bot-message {
+                color: #f0f0f0; /* Lighter text color for dark mode */
+            }
         }
 
         .input-box {
@@ -117,6 +136,8 @@
             border-radius: var(--border-radius-sm);
             border: 1px solid #ccc;
             font-size: var(--font-size-md);
+            background-color: var(--container-bg);
+            color: inherit;
         }
 
         button {
@@ -174,6 +195,13 @@
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
             width: 100%;
             max-width: 500px;
+            color: #333;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .location-prompt {
+                color: #f0f0f0;
+            }
         }
 
         @media (max-width: 600px) {
@@ -444,7 +472,7 @@ This is Manikanta. I got a forwarded message from your mother, and I felt like y
 Waiting for your next move, **Agent Kavya.** 😎🎉 If you're up for a **challenge**, **decode this** to get my number: **HAGIDDFCFF.** Think of it as a **test of fate**… or just a fun puzzle. 😜
 **No pressure—just saying hi.** Hope this message didn't weird you out too much. 😅
 *(P.S. Shoutout to **ChatGPT** for helping me write this in a fun way instead of sending a boring text! 😅)*
-Don’t think I have a predefined template for this chat! These days, it’s just easier with the help of GPTs.
+Don't think I have a predefined template for this chat! These days, it's just easier with the help of GPTs.
 `;
                 
                 // Convert markdown-style formatting to HTML
