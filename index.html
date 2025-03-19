@@ -291,7 +291,7 @@ I just got to know about this match a few days ago and haven't spoken to you bef
                     
                     // Check if in Karnataka state
                     const state = data.address && data.address.state;
-                    if (state && state.toLowerCase().includes("telangana")) {
+                    if (state && state.toLowerCase().includes("karnataka")) {
                         // Location verified, show chat
                         document.getElementById("location-prompt").style.display = "none";
                         document.getElementById("chat-container").style.display = "flex";
@@ -331,7 +331,7 @@ I just got to know about this match a few days ago and haven't spoken to you bef
 
         const questions = [
             { text: "What's your date of birth? (Please use DD/MM/YYYY format)", answer: "14/06/1999", hint: "Please enter in DD/MM/YYYY format (e.g., 01/01/2000)" },
-            { text: "Where did you complete your Master's?", validAnswers: ["amalapuram", "batlapalem", "bvc", "bvc engineering college"] },
+            { text: "Where did you complete your Master's(MCA)?", validAnswers: ["amalapuram", "batlapalem", "bvc", "bvc engineering college"] },
             { text: "What is the name of the photographer/friend/mobile owner of the saree picture you sent to our boss, Manikanta?", answer: "harini", hint: "You can find the name in the bottom left corner of the photo. Eg: Shot on Oneplus By " }
         ];
         let currentQuestion = 0;
